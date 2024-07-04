@@ -8,7 +8,7 @@ pub trait Plugin {
 // Helper macro to export a plugin
 #[macro_export]
 macro_rules! export_plugin {
-    ($plugin:ty) => {
+    ($plugin:expr) => {
         #[no_mangle]
         pub extern "C" fn new_plugin() -> *mut dyn Plugin {
             Box::into_raw(Box::new($plugin))
@@ -38,9 +38,23 @@ mod tests {
 
     #[test]
     fn test_load_plugin() {
-        let plugin = load_plugin("/Users/hasan/repos/block-buster/target/debug/libbuiltins.dylib");
+        let plugin = load_plugin("../target/debug/libbuiltins.dylib");
+        let code = r#"
+          let x = 2;
+          let y = 4;
+          console.log(x + y);
+        "#;
         match plugin {
-            Ok(_) => assert!(true),
+            Ok(plugin) => {
+                let result = plugin.compile(code);
+                match result {
+                    Ok(_) => assert!(true),
+                    Err(msg) => {
+                        dbg!(msg);
+                        assert!(false)
+                    }
+                }
+            }
             Err(msg) => {
                 dbg!(msg);
                 assert!(false)

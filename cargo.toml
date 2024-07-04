@@ -1,3 +1,7 @@
 [workspace]
-resolver = "2"
-members = [ "builtins", "cli", "parser", "plugin", "builtins"]
+members = [
+    "plugin",
+    "builtins",
+    "parser",
+    "cli",
+]
