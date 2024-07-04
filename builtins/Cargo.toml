@@ -1,0 +1,11 @@
+[package]
+name = "builtins"
+version = "0.1.0"
+edition = "2021"
+build = "../build.rs"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+plugin = { path = "../plugin" }

@@ -20,8 +20,31 @@ macro_rules! export_plugin {
 pub fn load_plugin(path: &str) -> Result<Box<dyn Plugin>, String> {
     unsafe {
         let lib = Library::new(path).map_err(|e| e.to_string())?;
-        let plugin: Symbol<fn() -> Box<dyn Plugin>> =
+        let new_plugin: Symbol<fn() -> *mut dyn Plugin> =
             lib.get(b"new_plugin").map_err(|e| e.to_string())?;
-        Ok(plugin())
+        let raw_plugin = new_plugin();
+        if raw_plugin.is_null() {
+            Err("Failed to create plugin".into())
+        } else {
+            Ok(Box::from_raw(raw_plugin))
+        }
+    }
+}
+
+// Tests
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_load_plugin() {
+        let plugin = load_plugin("/Users/hasan/repos/block-buster/target/debug/libbuiltins.dylib");
+        match plugin {
+            Ok(_) => assert!(true),
+            Err(msg) => {
+                dbg!(msg);
+                assert!(false)
+            }
+        }
     }
 }
